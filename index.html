@@ -1,148 +1,90 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Painel de Pedidos - Cozinha</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #ffede1;
-    color: #333;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  header {
-    background: #d8544a;
-    width: 100%;
-    padding: 15px 0;
-    color: white;
-    font-size: 2rem;
-    font-weight: bold;
-    text-align: center;
-    user-select: none;
-  }
-  main {
-    width: 95%;
-    max-width: 600px;
-    margin: 15px auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(216,84,74,0.5);
-    padding: 10px 15px;
-  }
-  .pedido {
-    border-bottom: 1px solid #f7b8aa;
-    padding: 12px 8px;
-  }
-  .pedido:last-child {
-    border-bottom: none;
-  }
-  .mesa {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #b5372e;
-  }
-  .itens {
-    margin-left: 12px;
-    font-size: 1.1rem;
-    white-space: pre-wrap;
-  }
-  .forma-pagamento {
-    margin-top: 6px;
-    font-weight: 600;
-    color: #d8544a;
-  }
-  .observacoes {
-    font-style: italic;
-    color: #755;
-    margin-top: 4px;
-    white-space: pre-wrap;
-  }
-  .btns {
-    margin-top: 10px;
-  }
-  button {
-    background-color: #d8544a;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 15px;
-    margin-right: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #bf3e38;
-  }
-  footer {
-    margin: 10px 0 20px;
-    font-size: 0.8rem;
-    color: #b54a41;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel da Cozinha</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+    h2 { text-align: center; background: #d35400; color: #fff; margin: 0; padding: 1rem; }
+    .container { padding: 20px; display: flex; gap: 20px; justify-content: space-around; }
+    .painel { width: 45%; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 1rem; }
+    .pedido { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    .pronto { background: #d4edda; }
+    .alerta { background: #ffeeba; animation: piscar 1s infinite alternate; }
+    @keyframes piscar { from { background: #ffeeba; } to { background: #f8d7da; } }
+    button { margin-top: 5px; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-pronto { background: #27ae60; color: #fff; }
+    .btn-entregue { background: #c0392b; color: #fff; }
+  </style>
 </head>
-<body>
-<header>🍕 Painel de Pedidos - Cozinha</header>
-<main id="pedidos-container">
-  <!-- Pedidos aparecem aqui -->
-</main>
-<footer>™ Opportunità Pizzaria Social - Desenvolvido por ChatGPT</footer>
+<body>  <h2>Painel da Cozinha</h2>
+  <div class="container">
+    <div class="painel" id="cozinha">
+      <h3>Cozinha</h3>
+      <div id="pedidosCozinha"></div>
+    </div><div class="painel" id="garcom">
+  <h3>Garçom</h3>
+  <div id="pedidosGarcom"></div>
+</div>
 
-<script>
-  const pedidosContainer = document.getElementById('pedidos-container');
+  </div><audio id="sino" src="https://www.soundjay.com/buttons/sounds/bell-ringing-05.mp3" preload="auto"></audio>
 
-  function carregarPedidos() {
-    const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
-    pedidosContainer.innerHTML = '';
-    if (pedidos.length === 0) {
-      pedidosContainer.innerHTML = '<p style="text-align:center; color:#b54a41;">Nenhum pedido recebido ainda.</p>';
-      return;
-    }
-    pedidos.forEach((pedido, index) => {
-      const div = document.createElement('div');
-      div.className = 'pedido';
+  <script>
+    let pedidos = [
+      { id: 1, nome: 'Pizza Calabresa', status: 'pendente' },
+      { id: 2, nome: 'Pizza Quatro Queijos', status: 'pendente' },
+    ];
 
-      let itensText = '';
-      pedido.itens.forEach(i => {
-        itensText += `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}\n`;
+    function renderizarPedidos() {
+      const pedidosCozinha = document.getElementById('pedidosCozinha');
+      const pedidosGarcom = document.getElementById('pedidosGarcom');
+
+      pedidosCozinha.innerHTML = '';
+      pedidosGarcom.innerHTML = '';
+
+      pedidos.forEach(pedido => {
+        // Cozinha
+        const divCozinha = document.createElement('div');
+        divCozinha.className = 'pedido' + (pedido.status === 'pronto' ? ' pronto' : '');
+        divCozinha.innerHTML = `<strong>${pedido.nome}</strong><br/>`;
+        if (pedido.status !== 'pronto') {
+          const btn = document.createElement('button');
+          btn.className = 'btn-pronto';
+          btn.innerText = 'Marcar como Pronta';
+          btn.onclick = () => marcarComoPronta(pedido.id);
+          divCozinha.appendChild(btn);
+        }
+        pedidosCozinha.appendChild(divCozinha);
+
+        // Garçom
+        const divGarcom = document.createElement('div');
+        divGarcom.className = 'pedido' + (pedido.status === 'pronto' ? ' alerta' : '');
+        divGarcom.innerHTML = `<strong>${pedido.nome}</strong><br/>`;
+        if (pedido.status === 'pronto') {
+          const btn = document.createElement('button');
+          btn.className = 'btn-entregue';
+          btn.innerText = 'Marcar como Entregue';
+          btn.onclick = () => marcarComoEntregue(pedido.id);
+          divGarcom.appendChild(btn);
+        }
+        pedidosGarcom.appendChild(divGarcom);
       });
+    }
 
-      div.innerHTML = `
-        <div class="mesa">Mesa ${pedido.mesa}</div>
-        <pre class="itens">${itensText}</pre>
-        <div class="forma-pagamento">Forma de pagamento: ${pedido.formaPagamento}</div>
-        ${pedido.observacoes ? `<div class="observacoes">Obs: ${pedido.observacoes}</div>` : ''}
-        <div class="btns">
-          <button onclick="pizzaPronta(${index})">Pizza Pronta</button>
-          <button onclick="excluirPedido(${index})">Excluir Pedido</button>
-        </div>
-      `;
-      pedidosContainer.appendChild(div);
-    });
-  }
+    function marcarComoPronta(id) {
+      const pedido = pedidos.find(p => p.id === id);
+      if (pedido) {
+        pedido.status = 'pronto';
+        document.getElementById('sino').play();
+        renderizarPedidos();
+      }
+    }
 
-  function pizzaPronta(index) {
-    const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
-    const pedido = pedidos[index];
-    const whatsappNumber = '5511988553006'; // Número do garçom/cozinha
-    const msg = `✅ Pedido da Mesa ${pedido.mesa} está PRONTO!\n${pedido.itens.map(i => `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}`).join('\n')}`;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
-  }
+    function marcarComoEntregue(id) {
+      pedidos = pedidos.filter(p => p.id !== id);
+      renderizarPedidos();
+    }
 
-  function excluirPedido(index) {
-    const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
-    pedidos.splice(index, 1);
-    localStorage.setItem('pedidosPainel', JSON.stringify(pedidos));
-    carregarPedidos();
-  }
-
-  setInterval(carregarPedidos, 3000);
-  carregarPedidos();
-</script>
-</body>
+    renderizarPedidos();
+  </script></body>
 </html>
