@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Painel de Pedidos - Cozinha</title>
 
-<!-- Firebase SDK -->
+<!-- ✅ Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
@@ -19,7 +19,7 @@
     appId: "1:215385735729:web:303178bcfae6366f6a0b10"
   };
   firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
+  const db = firebase.database();
 </script>
 
 <style>
@@ -67,7 +67,6 @@
   .itens {
     margin-left: 12px;
     font-size: 1.1rem;
-    white-space: pre-wrap;
   }
   .forma-pagamento {
     margin-top: 6px;
@@ -79,23 +78,6 @@
     color: #755;
     margin-top: 4px;
     white-space: pre-wrap;
-  }
-  .btns {
-    margin-top: 10px;
-  }
-  button {
-    background-color: #d8544a;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 15px;
-    margin-right: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #bf3e38;
   }
   footer {
     margin: 10px 0 20px;
@@ -109,13 +91,13 @@
 <main id="pedidos-container">
   <!-- Pedidos aparecem aqui -->
 </main>
-<footer>™ Opportunità Pizzaria Social - Desenvolvido por ChatGPT</footer>
+<footer>™ Opportunità Pizzaria Social - Desenvolvido todos direitos reservados</footer>
 
 <script>
   const pedidosContainer = document.getElementById('pedidos-container');
 
-  // 🔥 Ouvir os pedidos em tempo real do Firebase
-  database.ref("pedidos").on("value", (snapshot) => {
+  // ✅ OUVE OS PEDIDOS DO FIREBASE EM TEMPO REAL
+  firebase.database().ref("pedidos").on("value", snapshot => {
     const pedidos = snapshot.val();
     pedidosContainer.innerHTML = '';
 
@@ -124,48 +106,27 @@
       return;
     }
 
-    Object.entries(pedidos).forEach(([id, pedido]) => {
-      if (pedido.status !== "entregue") { // só mostra pendentes ou prontos
-        const div = document.createElement('div');
-        div.className = 'pedido';
+    // Transforma em array e ordena por hora
+    const listaPedidos = Object.values(pedidos).sort((a,b) => a.timestamp - b.timestamp);
 
-        let itensText = '';
-        pedido.itens.forEach(i => {
-          itensText += `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}\n`;
-        });
+    listaPedidos.forEach(pedido => {
+      const div = document.createElement('div');
+      div.className = 'pedido';
 
-        div.innerHTML = `
-          <div class="mesa">Mesa ${pedido.mesa}</div>
-          <pre class="itens">${itensText}</pre>
-          <div class="forma-pagamento">Forma de pagamento: ${pedido.formaPagamento}</div>
-          ${pedido.observacoes ? `<div class="observacoes">Obs: ${pedido.observacoes}</div>` : ''}
-          <div class="btns">
-            <button onclick="pizzaPronta('${id}')">Pizza Pronta</button>
-            <button onclick="excluirPedido('${id}')">Excluir Pedido</button>
-          </div>
-        `;
-        pedidosContainer.appendChild(div);
-      }
+      let itensText = '';
+      pedido.itens.forEach(i => {
+        itensText += `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}\n`;
+      });
+
+      div.innerHTML = `
+        <div class="mesa">Mesa ${pedido.mesa}</div>
+        <pre class="itens">${itensText}</pre>
+        <div class="forma-pagamento">Forma de pagamento: ${pedido.formaPagamento}</div>
+        ${pedido.observacoes ? `<div class="observacoes">Obs: ${pedido.observacoes}</div>` : ''}
+      `;
+      pedidosContainer.appendChild(div);
     });
   });
-
-  // ✅ Marca como pronto no Firebase
-  function pizzaPronta(id) {
-    database.ref("pedidos/" + id).update({ status: "pronto" });
-
-    // (Opcional) Enviar WhatsApp pro garçom avisando
-    database.ref("pedidos/" + id).once("value").then(snapshot => {
-      const pedido = snapshot.val();
-      const whatsappNumber = '556296094975';
-      const msg = `✅ Pedido da Mesa ${pedido.mesa} está PRONTO!\n${pedido.itens.map(i => `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}`).join('\n')}`;
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
-    });
-  }
-
-  // ❌ Exclui pedido do Firebase
-  function excluirPedido(id) {
-    database.ref("pedidos/" + id).remove();
-  }
 </script>
 </body>
 </html>
