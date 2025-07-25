@@ -129,7 +129,7 @@
   function pizzaPronta(index) {
     const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
     const pedido = pedidos[index];
-    const whatsappNumber = '5511988553006'; // Número do garçom/cozinha
+    const whatsappNumber = '556296094975'; // Número do garçom/cozinha
     const msg = `✅ Pedido da Mesa ${pedido.mesa} está PRONTO!\n${pedido.itens.map(i => `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}`).join('\n')}`;
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
   }
