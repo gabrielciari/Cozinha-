@@ -49,6 +49,7 @@
   .itens {
     margin-left: 12px;
     font-size: 1.1rem;
+    white-space: pre-wrap;
   }
   .forma-pagamento {
     margin-top: 6px;
@@ -60,6 +61,23 @@
     color: #755;
     margin-top: 4px;
     white-space: pre-wrap;
+  }
+  .btns {
+    margin-top: 10px;
+  }
+  button {
+    background-color: #d8544a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #bf3e38;
   }
   footer {
     margin: 10px 0 20px;
@@ -73,7 +91,7 @@
 <main id="pedidos-container">
   <!-- Pedidos aparecem aqui -->
 </main>
-<footer>™ Opportunità Pizzaria Social - Desenvolvido todos direitos reservados</footer>
+<footer>™ Opportunità Pizzaria Social - Desenvolvido por ChatGPT</footer>
 
 <script>
   const pedidosContainer = document.getElementById('pedidos-container');
@@ -85,7 +103,7 @@
       pedidosContainer.innerHTML = '<p style="text-align:center; color:#b54a41;">Nenhum pedido recebido ainda.</p>';
       return;
     }
-    pedidos.forEach(pedido => {
+    pedidos.forEach((pedido, index) => {
       const div = document.createElement('div');
       div.className = 'pedido';
 
@@ -99,12 +117,30 @@
         <pre class="itens">${itensText}</pre>
         <div class="forma-pagamento">Forma de pagamento: ${pedido.formaPagamento}</div>
         ${pedido.observacoes ? `<div class="observacoes">Obs: ${pedido.observacoes}</div>` : ''}
+        <div class="btns">
+          <button onclick="pizzaPronta(${index})">Pizza Pronta</button>
+          <button onclick="excluirPedido(${index})">Excluir Pedido</button>
+        </div>
       `;
       pedidosContainer.appendChild(div);
     });
   }
 
-  // Atualiza a cada 3 segundos
+  function pizzaPronta(index) {
+    const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
+    const pedido = pedidos[index];
+    const whatsappNumber = '5511988553006'; // Número do garçom/cozinha
+    const msg = `✅ Pedido da Mesa ${pedido.mesa} está PRONTO!\n${pedido.itens.map(i => `🍕 ${i.pizza} | Borda: ${i.borda} | Bebida: ${i.bebida || '-'}`).join('\n')}`;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  function excluirPedido(index) {
+    const pedidos = JSON.parse(localStorage.getItem('pedidosPainel') || '[]');
+    pedidos.splice(index, 1);
+    localStorage.setItem('pedidosPainel', JSON.stringify(pedidos));
+    carregarPedidos();
+  }
+
   setInterval(carregarPedidos, 3000);
   carregarPedidos();
 </script>
